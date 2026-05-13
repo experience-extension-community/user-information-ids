@@ -140,6 +140,22 @@ npm test               # Jest + React Testing Library + jest-axe
 
 Every component has render, behavior, and `jest-axe` accessibility coverage.
 
+## Troubleshooting
+
+Environment-specific snags (Windows + AppLocker `.cmd` blocking, etc.) are
+collected in [`docs/troubleshooting.md`](docs/troubleshooting.md). Check there
+first if an npm script fails before you've changed anything.
+
+## Before promoting to Production
+
+This sample's catalog status is 🟡 **Beta**. The path to 🟢 **Stable** runs
+through the manual test checklist in
+[`docs/manual-test-checklist.md`](docs/manual-test-checklist.md) — deploy to
+a real tenant, walk the role-based card / page behavior, run a manual a11y
+pass, capture screenshots. The org-level criteria (production deployment,
+two-institution review, etc.) live in
+[ARCHITECTURE.md § 16](https://github.com/experience-extension-community/.github/blob/main/ARCHITECTURE.md#16-promotion-to-org-checklist).
+
 ## Contributing
 
 Read the org-level [Contributing Guide][contrib] first. PRs need:
