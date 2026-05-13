@@ -194,9 +194,10 @@ const UserInformationCard = ({ classes }) => {
         if (!authenticatedEthosFetch || !cardId) return;
 
         try {
-            const response = await authenticatedEthosFetch(
-                `${institution.dataConnectPipelineName}?cardId=${cardId}&cardPrefix=${cardPrefix}`
-            );
+            const url = `${institution.dataConnectPipelineName}`
+                + `?cardId=${encodeURIComponent(cardId)}`
+                + `&cardPrefix=${encodeURIComponent(cardPrefix)}`;
+            const response = await authenticatedEthosFetch(url);
 
             if (!response.ok) {
                 console.error('UserInformationCard: Non-OK response:', response.status, response.statusText);
@@ -225,12 +226,19 @@ const UserInformationCard = ({ classes }) => {
             setCredentials(data);
         } catch (err) {
             console.error('UserInformationCard: Error fetching credentials:', err);
-            if (err.message && (err.message.includes('401') || err.message.includes('auth'))) {
+            // Heuristic categorization based on substring matches. The SDK's error
+            // wording is not part of a stable contract — if these strings change
+            // upstream, every error falls through to the generic branch. Prefer
+            // structured error fields (`err.status`, `err.name`) if/when the SDK
+            // exposes them.
+            if (err && err.message && (err.message.includes('401') || err.message.includes('auth'))) {
                 setError('Unable to retrieve IDs (authentication error).');
-            } else if (err.message && (err.message.includes('network') || err.message.includes('Failed to fetch'))) {
+            } else if (err && err.message && (err.message.includes('network') || err.message.includes('Failed to fetch'))) {
                 setError('Unable to retrieve IDs (network error).');
             } else {
-                setError(`Unable to retrieve IDs (${(err && err.message) || 'unknown error'}).`);
+                // Intentionally generic — avoid leaking SDK-internal `err.message`
+                // strings to end users. Full details are in console.error above.
+                setError('Unable to retrieve IDs. Please try again later.');
             }
         } finally {
             setIsLoading(false);

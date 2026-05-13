@@ -31,7 +31,7 @@ See `docs/images/` (placeholders pending a maintainer with a running tenant).
 ```bash
 # Fork via "Use this template" or clone directly, then:
 cd extension
-nvm use                # Node 20.18.1 per .nvmrc
+nvm use                # Node 20.18.1 per .nvmrc; newer LTS (20–24) works for local dev
 npm install
 cp sample.env .env     # fill in EXPERIENCE_EXTENSION_UPLOAD_TOKEN
 
