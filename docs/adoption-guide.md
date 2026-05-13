@@ -92,16 +92,20 @@ From `dataconnect/COMMUNITY-experience-personsCredentials-get-ids_v1.0.0.json`:
    `COMMUNITY-experience-personsCredentials-get-ids`.
 3. **Rename** the resource to match the value you set in
    `institution.dataConnectPipelineName` (Step 2).
-4. **Replace the parameter defaults** — every parameter currently has
-   `<your-code-here>` as its default. Set each to your institution's actual
-   credential-type code:
-   - `legacyIdCode` — your "legacy" credential code (e.g., the value of your
-     pre-Banner student ID type if you have one)
-   - `workdayIdCode` — your Workday EMPL code (or equivalent)
-   - `bannerIdType` — usually `bannerId` (matches the Ellucian Banner
-     credential type)
-   - `studentNetIdCode` — your student NetID code
-   - `employeeNetIdCode` — your employee NetID code
+4. **Verify each parameter's default matches your institution's Ethos
+   credential code; override only if it differs.** The JSON ships with
+   Ellucian-standard defaults (`SDNT`, `EMPL`, `bannerId`, `ENET`,
+   `SNET`) that work out-of-the-box for most Ethos tenants:
+   - `legacyIdCode` — `SDNT` (the pre-Banner / SD-NT student code).
+     If your institution doesn't use a legacy code, leave it as-is —
+     the corresponding row is disabled by default in `credentialTypes.js`.
+   - `workdayIdCode` — `EMPL`
+   - `bannerIdType` — `bannerId`
+   - `studentNetIdCode` — `SNET`
+   - `employeeNetIdCode` — `ENET`
+
+   Override either in the JSON before import, or at the DC resource
+   configuration level after import.
 5. When you configure the card in Experience Setup, add the **`ethosApiKey`**
    server-config value pointing to a valid Ethos API key.
 

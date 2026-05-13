@@ -55,6 +55,15 @@ const styles = () => ({
         color: tokens.text.secondary,
         fontSize: '0.9rem',
         fontStyle: 'italic'
+    },
+    idList: {
+        listStyle: 'none',
+        padding: 0,
+        margin: 0,
+        width: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '0.75rem'
     }
 });
 
@@ -132,9 +141,10 @@ const HomePage = ({ classes }) => {
         if (!authenticatedEthosFetch || !cardId) return;
         setLoadingStatus(true);
         try {
-            const response = await authenticatedEthosFetch(
-                `${institution.dataConnectPipelineName}?cardId=${cardId}&cardPrefix=${cardPrefix}`
-            );
+            const url = `${institution.dataConnectPipelineName}`
+                + `?cardId=${encodeURIComponent(cardId)}`
+                + `&cardPrefix=${encodeURIComponent(cardPrefix)}`;
+            const response = await authenticatedEthosFetch(url);
 
             if (!response.ok) {
                 console.error('HomePage: Non-OK response:', response.status, response.statusText);
@@ -207,7 +217,11 @@ const HomePage = ({ classes }) => {
                     </Typography>
                     {rows.length === 0
                         ? <Typography className={classes.noDataText}>No IDs available</Typography>
-                        : rows}
+                        : (
+                            <ul className={classes.idList}>
+                                {rows.map((row, i) => <li key={i}>{row}</li>)}
+                            </ul>
+                        )}
                 </section>
             </div>
         );
@@ -225,9 +239,14 @@ const HomePage = ({ classes }) => {
                     </Typography>
                     {(() => {
                         const rows = buildRowsForSide(credentials, 'student');
-                        return rows.length === 0
-                            ? <Typography className={classes.noDataText}>No student IDs available</Typography>
-                            : rows;
+                        if (rows.length === 0) {
+                            return <Typography className={classes.noDataText}>No student IDs available</Typography>;
+                        }
+                        return (
+                            <ul className={classes.idList}>
+                                {rows.map((row, i) => <li key={i}>{row}</li>)}
+                            </ul>
+                        );
                     })()}
                 </section>
             )}
@@ -239,9 +258,14 @@ const HomePage = ({ classes }) => {
                     </Typography>
                     {(() => {
                         const rows = buildRowsForSide(credentials, 'employee');
-                        return rows.length === 0
-                            ? <Typography className={classes.noDataText}>No employee IDs available</Typography>
-                            : rows;
+                        if (rows.length === 0) {
+                            return <Typography className={classes.noDataText}>No employee IDs available</Typography>;
+                        }
+                        return (
+                            <ul className={classes.idList}>
+                                {rows.map((row, i) => <li key={i}>{row}</li>)}
+                            </ul>
+                        );
                     })()}
                 </section>
             )}
