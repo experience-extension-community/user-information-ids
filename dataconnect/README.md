@@ -23,17 +23,25 @@ of `extension/src/config/institution.js → dataConnectPipelineName`.
    `COMMUNITY-experience-personsCredentials-get-ids` to whatever value you
    set in `extension/src/config/institution.js → dataConnectPipelineName`.
    The card calls Data Connect by that name; the two must match exactly.
-3. **Replace placeholder credential codes**. Every parameter (except
-   `ethosApiKey`) currently has the default value `<your-code-here>`.
-   Set each to your institution's actual code:
-   - `legacyIdCode` — your "legacy" / pre-Banner credential code (set to
-     anything if you don't use one; the corresponding row is disabled by
-     default in `credentialTypes.js`).
-   - `workdayIdCode` — your Workday EMPL code.
-   - `bannerIdType` — your Banner credential type string (typically the
-     string `bannerId` for Ellucian Banner customers).
-   - `studentNetIdCode` — your student NetID alternative-credential code.
-   - `employeeNetIdCode` — your employee NetID alternative-credential code.
+3. **Verify each parameter's `default` matches your institution's Ethos
+   credential code; override if it differs.** The JSON ships with the
+   Ellucian-standard codes pre-set as parameter defaults, which work
+   out-of-the-box for most Ethos tenants. Check each one against your
+   actual Ethos configuration:
+   - `legacyIdCode` — ships as `SDNT` (the Ellucian "pre-Banner / SD-NT"
+     student code). If your institution doesn't use a legacy code, leave
+     this as-is; the corresponding row is disabled by default in
+     `credentialTypes.js`.
+   - `workdayIdCode` — ships as `EMPL` (Ellucian's standard Workday
+     employee code).
+   - `bannerIdType` — ships as `bannerId` (the literal string Ethos uses
+     on the `credentials[].type` field for Banner IDs).
+   - `studentNetIdCode` — ships as `SNET`.
+   - `employeeNetIdCode` — ships as `ENET`.
+
+   Override only if your tenant uses non-standard codes. You can edit the
+   `default` fields in the JSON before import, or override at the DC
+   resource configuration level after import — both work.
 4. **Keep `credentialTypes.js` in sync** with what your pipeline returns.
    The component reads `credentials[ct.key]`, where `ct.key` is one of the
    five response fields above. Adding a new credential type means a) emit
