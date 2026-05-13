@@ -145,9 +145,9 @@ function hasDataForSide(credentials, side) {
         .some(ct => Boolean(credentials[ct.key]));
 }
 
-function buildRowsForSide(credentials, side) {
+function buildRowsFromCredentialTypes(credentials, filterFn = () => true) {
     return credentialTypes
-        .filter(ct => ct.enabled && ct.sides.includes(side))
+        .filter(ct => ct.enabled && filterFn(ct))
         .map(ct => {
             const rawValue = credentials[ct.key];
             if (!rawValue) return null;
@@ -165,6 +165,10 @@ function buildRowsForSide(credentials, side) {
         .filter(Boolean);
 }
 
+function buildRowsForSide(credentials, side) {
+    return buildRowsFromCredentialTypes(credentials, ct => ct.sides.includes(side));
+}
+
 const UserInformationCard = ({ classes }) => {
     useTypekitFont();
 
@@ -175,6 +179,7 @@ const UserInformationCard = ({ classes }) => {
     const [credentials, setCredentials] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [noData, setNoData] = useState(false);
     const [animKey, setAnimKey] = useState(0);
 
     const defaultSide = useMemo(() => getDefaultSide(userRoles), [userRoles]);
@@ -213,7 +218,7 @@ const UserInformationCard = ({ classes }) => {
                 .some(ct => Boolean(data && data[ct.key]));
 
             if (!hasAnyValue) {
-                setError('No IDs found.');
+                setNoData(true);
                 return;
             }
 
@@ -236,6 +241,24 @@ const UserInformationCard = ({ classes }) => {
         fetchCredentials();
     }, [fetchCredentials]);
 
+    // Auto-switch sides when the role-derived default has no data but
+    // another side does. Prevents users from being stuck on an empty
+    // side when their actual credentials live on the other side.
+    useEffect(() => {
+        if (!credentials || side === 'general') return;
+        const sideHasDataFor = (s) => credentialTypes
+            .filter(ct => ct.enabled && ct.sides.includes(s))
+            .some(ct => Boolean(credentials[ct.key]));
+        if (!sideHasDataFor(side)) {
+            const otherSide = side === 'student' ? 'employee' : 'student';
+            if (sideHasDataFor(otherSide)) {
+                setSide(otherSide);
+            } else if (sideHasDataFor('general')) {
+                setSide('general');
+            }
+        }
+    }, [credentials, side]);
+
     if (isLoading) {
         return (
             <div className={classes.loadingContainer} role="status" aria-label="Loading IDs">
@@ -252,12 +275,28 @@ const UserInformationCard = ({ classes }) => {
         );
     }
 
+    if (noData) {
+        return (
+            <div className={classes.errorContainer} role="status">
+                <Typography className={classes.noDataText}>
+                    No IDs available for your account.
+                </Typography>
+            </div>
+        );
+    }
+
     const hasStudentData = hasDataForSide(credentials, 'student');
     const hasEmployeeData = hasDataForSide(credentials, 'employee');
     const canFlip = hasStudentData && hasEmployeeData;
 
     if (side === 'general') {
-        const rows = buildRowsForSide(credentials, 'general');
+        let rows = buildRowsForSide(credentials, 'general');
+        if (rows.length === 0) {
+            // Adopter may have restricted some credentials away from the 'general'
+            // side. Fall back to showing any available data so the user isn't
+            // blocked just because their data lives on a different side.
+            rows = buildRowsFromCredentialTypes(credentials);
+        }
         return (
             <div className={classes.cardContainer}>
                 {rows.length === 0
