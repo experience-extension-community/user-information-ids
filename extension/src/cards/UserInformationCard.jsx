@@ -336,7 +336,9 @@ const UserInformationCard = ({ classes }) => {
             </div>
 
             <span className={classes.srOnly} aria-live="polite">
-                {isStudent ? 'Showing student IDs' : 'Showing employee IDs'}
+                {animKey > 0
+                    ? (isStudent ? 'Showing student IDs' : 'Showing employee IDs')
+                    : ''}
             </span>
 
             {rows.length === 0
