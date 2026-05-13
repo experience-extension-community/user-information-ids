@@ -93,10 +93,13 @@ describe('UserInformationCard', () => {
         expect(screen.getByText(/Unable to retrieve IDs/i)).toBeInTheDocument();
     });
 
-    it('renders "No IDs found" when DC returns an empty object', async () => {
+    it('renders a polite "no data" status (not an alert) when DC returns an empty object', async () => {
         useData.mockReturnValue({ authenticatedEthosFetch: mockFetchSuccess({}) });
         render(<UserInformationCard />);
-        await waitFor(() => expect(screen.getByText(/No IDs found/i)).toBeInTheDocument());
+        await waitFor(() => expect(screen.getByText(/No IDs available/i)).toBeInTheDocument());
+        // Empty data is a valid response, not an error — should not interrupt screen-reader users.
+        expect(screen.getByRole('status')).toBeInTheDocument();
+        expect(screen.queryByRole('alert')).not.toBeInTheDocument();
     });
 
     it('has no axe violations once loaded (student role)', async () => {

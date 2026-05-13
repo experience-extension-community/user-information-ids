@@ -135,7 +135,31 @@ const HomePage = ({ classes }) => {
             const response = await authenticatedEthosFetch(
                 `${institution.dataConnectPipelineName}?cardId=${cardId}&cardPrefix=${cardPrefix}`
             );
-            const data = await response.json();
+
+            if (!response.ok) {
+                console.error('HomePage: Non-OK response:', response.status, response.statusText);
+                setErrorMessage({
+                    headerMessage: 'Error',
+                    textMessage: `Unable to retrieve your IDs (status ${response.status}).`,
+                    iconName: 'error',
+                    iconColor: tokens.status.error
+                });
+                return;
+            }
+
+            let data;
+            try {
+                data = await response.json();
+            } catch (parseErr) {
+                console.error('HomePage: Failed to parse response JSON:', parseErr);
+                setErrorMessage({
+                    headerMessage: 'Error',
+                    textMessage: 'Unable to retrieve your IDs (invalid response).',
+                    iconName: 'error',
+                    iconColor: tokens.status.error
+                });
+                return;
+            }
 
             const hasAnyValue = credentialTypes
                 .filter(ct => ct.enabled)
