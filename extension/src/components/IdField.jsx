@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { Typography } from '@ellucian/react-design-system/core';
 import { withStyles } from '@ellucian/react-design-system/core/styles';
@@ -99,13 +99,40 @@ CheckIcon.propTypes = { className: PropTypes.string };
 
 const IdField = ({ classes, label, value, isEmail }) => {
     const [copied, setCopied] = useState(false);
+    const resetTimerRef = useRef(null);
 
-    const handleCopy = useCallback(() => {
-        if (navigator && navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
-            navigator.clipboard.writeText(value);
+    // Clear any pending reset timer when the component unmounts so we
+    // don't setState on an unmounted IdField.
+    useEffect(() => () => {
+        if (resetTimerRef.current) {
+            clearTimeout(resetTimerRef.current);
+            resetTimerRef.current = null;
+        }
+    }, []);
+
+    const handleCopy = useCallback(async () => {
+        // Only mark "copied" if the clipboard write actually succeeded.
+        // Otherwise the live region would announce a copy that didn't
+        // happen (insecure context, permission denied, browser without
+        // the Clipboard API).
+        if (!navigator || !navigator.clipboard || typeof navigator.clipboard.writeText !== 'function') {
+            return;
+        }
+        try {
+            await navigator.clipboard.writeText(value);
+        } catch {
+            // Surface failure as "no copy happened" — keep the icon as
+            // the copy icon, no announcement. Users can retry.
+            return;
         }
         setCopied(true);
-        setTimeout(() => setCopied(false), 1500);
+        if (resetTimerRef.current) {
+            clearTimeout(resetTimerRef.current);
+        }
+        resetTimerRef.current = setTimeout(() => {
+            setCopied(false);
+            resetTimerRef.current = null;
+        }, 1500);
     }, [value]);
 
     const handleKeyDown = useCallback((e) => {

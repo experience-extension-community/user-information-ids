@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: Apache-2.0
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { axe } from 'jest-axe';
 import IdField from './IdField';
 
@@ -40,12 +40,36 @@ describe('IdField', () => {
         expect(navigator.clipboard.writeText).toHaveBeenCalledWith('B12345');
     });
 
-    it('announces "Copied to clipboard" via the polite live region after copy', () => {
+    it('announces "Copied to clipboard" via the polite live region after a successful copy', async () => {
         const { container } = render(<IdField label="Banner ID" value="B12345" />);
         fireEvent.click(screen.getByRole('button'));
-        // The live region holds the announcement text
         const liveRegion = container.querySelector('[aria-live="polite"]');
-        expect(liveRegion).toHaveTextContent('Copied to clipboard');
+        // setCopied(true) runs after the clipboard write resolves, so wait for it.
+        await waitFor(() => expect(liveRegion).toHaveTextContent('Copied to clipboard'));
+    });
+
+    it('does NOT announce "Copied" when the clipboard write rejects', async () => {
+        navigator.clipboard.writeText = jest.fn().mockRejectedValue(new Error('NotAllowedError'));
+        const { container } = render(<IdField label="Banner ID" value="B12345" />);
+        fireEvent.click(screen.getByRole('button'));
+        // Allow the rejected promise to settle.
+        await new Promise(resolve => setTimeout(resolve, 0));
+        const liveRegion = container.querySelector('[aria-live="polite"]');
+        expect(liveRegion).not.toHaveTextContent('Copied to clipboard');
+    });
+
+    it('does NOT announce "Copied" when the Clipboard API is unavailable', async () => {
+        const original = navigator.clipboard;
+        Object.defineProperty(navigator, 'clipboard', { configurable: true, value: undefined });
+        try {
+            const { container } = render(<IdField label="Banner ID" value="B12345" />);
+            fireEvent.click(screen.getByRole('button'));
+            await new Promise(resolve => setTimeout(resolve, 0));
+            const liveRegion = container.querySelector('[aria-live="polite"]');
+            expect(liveRegion).not.toHaveTextContent('Copied to clipboard');
+        } finally {
+            Object.defineProperty(navigator, 'clipboard', { configurable: true, value: original });
+        }
     });
 
     it('renders correctly with isEmail=true', () => {
