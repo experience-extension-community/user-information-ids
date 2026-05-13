@@ -103,6 +103,8 @@ Everything else in `src/` reads from these. See
 | `credentialTypes[].label`                     | `src/config/credentialTypes.js`               | Yes — what users see.                            |
 | `credentialTypes[].enabled`                   | `src/config/credentialTypes.js`               | Yes — set `false` to hide a row entirely.        |
 | `credentialTypes[].ethosCode`                 | `src/config/credentialTypes.js`               | Yes — your institution's Ethos credential-type code. Passed to the DC pipeline. |
+| `credentialTypes[].sides`                     | `src/config/credentialTypes.js`               | Yes — array of `'student'`, `'employee'`, `'general'` controlling which side(s) of the card display this credential. |
+| `credentialTypes[].composeEmail`              | `src/config/credentialTypes.js`               | Optional. Set to `{ domainKey: 'studentEmailDomain' }` (or `'employeeEmailDomain'`) to render the value as an email by appending the matching `institution.*` domain. Omit to render the raw value. |
 | `roles.student`                               | `src/config/roles.js`                         | Yes — array of role strings (case-insensitive).  |
 | `roles.employee`                              | `src/config/roles.js`                         | Yes — array of role strings (case-insensitive).  |
 | `tokens.primary`                              | `src/utils/branding/tokens.js`                | Yes — primary brand color.                       |
