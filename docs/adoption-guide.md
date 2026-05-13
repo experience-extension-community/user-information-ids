@@ -58,9 +58,18 @@ Look at the array. For each row:
 - If your institution has this credential, set the `ethosCode` to your
   tenant's actual code.
 - If your institution does NOT have this credential, set `enabled: false`.
+- If you want a credential to appear on different side(s) than the
+  default (for example, moving a row that currently shows on both
+  `'student'` and `'general'` to *only* `'student'`), edit its `sides`
+  array. Valid entries: `'student'`, `'employee'`, `'general'`.
+- If a credential's value should be rendered as an email (composed with
+  your domain), set `composeEmail: { domainKey: 'studentEmailDomain' }`
+  (or `'employeeEmailDomain'`). Omit `composeEmail` to render the raw
+  value. The matching domain must be set on `institution` in
+  `institution.js` (or set that domain to `null` to disable composing).
 - If you have an additional credential not listed, append a new entry.
-  Decide its `sides` (which view it appears on) and whether it should be
-  composed into an email.
+  All five fields above (`key`, `label`, `enabled`, `ethosCode`, `sides`)
+  apply; `composeEmail` is optional.
 
 The `key` field must match the field name in the JSON response from your
 Ethos DC pipeline (see Step 5 below).

@@ -45,9 +45,12 @@ role. Open the dashboard where the card is configured.
 
 - [ ] Card loads without a long-stuck loading spinner (< 5s).
 - [ ] No "Unable to retrieve IDs" error.
-- [ ] No "No IDs found" message (assuming the test user has data).
-- [ ] Each enabled credential in `credentialTypes.js` that has a value
-  in the response renders a row.
+- [ ] No "No IDs available for your account" message (assuming the test
+  user has data).
+- [ ] Each enabled credential in `credentialTypes.js` whose `sides`
+  array includes `'student'` and that has a value in the response
+  renders a row. Credentials whose `sides` excludes `'student'` do
+  **not** render on this side (verifies the `sides` filter).
 - [ ] Email rows for credential types with `composeEmail` render the
   full composed email (`<netId><institution.studentEmailDomain>`), not
   just the raw NetID.
